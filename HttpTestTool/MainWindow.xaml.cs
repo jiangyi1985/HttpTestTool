@@ -47,7 +47,7 @@ namespace HttpTestTool
 
             btnStart.IsEnabled = false;
 
-            Task.Factory.StartNew(() => StartJob(count, url, mode, timeRange,showThreadLog,showResponse));
+            Task.Factory.StartNew(() => StartJob(count, url, mode, timeRange, showThreadLog, showResponse));
             //    .ContinueWith((task) =>
             //{
             //    Application.Current.Dispatcher.Invoke(() =>
@@ -57,7 +57,7 @@ namespace HttpTestTool
             //});
         }
 
-        private void StartJob(int count, string url, string mode, int timeRange,bool showThreadLog, bool showResponse)
+        private void StartJob(int count, string url, string mode, int timeRange, bool showThreadLog, bool showResponse)
         {
             //Thread.Sleep(3000);
             //return;
@@ -76,45 +76,69 @@ namespace HttpTestTool
 
             //var url = txtUrl.Text.Trim();
 
-            List<Task<double>> tasks = new List<Task<double>>();
+            List<Task<Result>> tasks = new List<Task<Result>>();
 
             for (int i = 0; i < count; i++)
             {
-                tasks.Add(new Task<double>(() =>
+                tasks.Add(new Task<Result>(() =>
                 {
                     var threadId = Thread.CurrentThread.ManagedThreadId;
 
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
                     var request = WebRequest.CreateHttp(url);
+                    request.Timeout = 20000;//todo:set by UI
 
                     //Thread.Sleep(r.Next(1000,2000));
 
-                    HttpWebResponse response;
+                    long length = 0;
+                    HttpStatusCode statusCode = (HttpStatusCode)0;
+                    string str = null;
+
+                    HttpWebResponse response = null;
                     try
                     {
                         response = request.GetResponse() as HttpWebResponse;
                     }
                     catch (WebException ex)
                     {
-                        response = ex.Response as HttpWebResponse;
+                        if (ex.Response != null)
+                            response = ex.Response as HttpWebResponse;
+                        else
+                            str = ex.Message;
                     }
 
-                    var length = response.ContentLength;
-                    var statusCode = response.StatusCode;
-                    var responseStream = response.GetResponseStream();
-                    var sr = new StreamReader(responseStream);
-                    var str = sr.ReadToEnd();
+                    if (response != null)
+                    {
+                        length = response.ContentLength;
+                        statusCode = response.StatusCode;
+                        var responseStream = response.GetResponseStream();
+                        var sr = new StreamReader(responseStream);
+                        str = sr.ReadToEnd();
+                    }
 
                     stopwatch.Stop();
 
                     var elapsedTotalMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                    if(showThreadLog)
-                    Application.Current.Dispatcher.Invoke(() =>
-                        txtOutput.AppendText("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds +
-                                             "ms " + statusCode + " " + length + "B "+(showResponse?str:"")+"\r\n"));
 
-                    return elapsedTotalMilliseconds;
+                    if (showThreadLog)
+                    {
+                        if (response != null)
+                            Application.Current.Dispatcher.Invoke(() =>
+                                txtOutput.AppendText("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds +
+                                                     "ms " + statusCode + " " + length + "B " + (showResponse ? str : "") +
+                                                     "\r\n"));
+                        else
+                            Application.Current.Dispatcher.Invoke(() =>
+                                txtOutput.AppendText("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds +
+                                                     "ms " + str + "\r\n"));
+                    }
+
+                    return new Result()
+                    {
+                        ElapsedMilliseconds = elapsedTotalMilliseconds,
+                        StatusCode = statusCode,
+                    };
                 }));
             }
 
@@ -146,22 +170,30 @@ namespace HttpTestTool
 
             Task.WaitAll(tasks.ToArray());
 
-            
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var min = tasks.Min(o=>o.Result);
-                    var max = tasks.Max(o => o.Result);
-                    var avg = tasks.Average(o => o.Result);
-                    txtOutput.AppendText("--------------------------------------------------------\r\n");
-                    txtOutput.AppendText("avg: " + avg + "ms min: " + min + "ms max: " + max + "ms\r\n");
-                    txtOutput.AppendText("--------------------------------------------------------\r\n");
-                    txtOutput.AppendText("\r\n");
-                });
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var min = tasks.Min(o => o.Result.ElapsedMilliseconds);
+                var max = tasks.Max(o => o.Result.ElapsedMilliseconds);
+                var avg = tasks.Average(o => o.Result.ElapsedMilliseconds);
+                var statusCodes = tasks.GroupBy(o => o.Result.StatusCode).OrderBy(o => o.Key)
+                    .Select(o => (o.Key == 0 ? "Ex" : o.Key.ToString()) + ":" + o.Count()).Aggregate((o, n) => o + " " + n);
+                txtOutput.AppendText("--------------------------------------------------------\r\n");
+                txtOutput.AppendText("avg: " + avg + "ms min: " + min + "ms max: " + max + "ms\r\n"
+                                     + statusCodes + "\r\n");
+                txtOutput.AppendText("--------------------------------------------------------\r\n");
+                txtOutput.AppendText("\r\n");
+            });
 
-                Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        btnStart.IsEnabled = true;
-                    });
+            Application.Current.Dispatcher.Invoke(() =>
+                {
+                    btnStart.IsEnabled = true;
+                });
+        }
+
+        class Result
+        {
+            public double ElapsedMilliseconds { get; set; }
+            public HttpStatusCode StatusCode { get; set; }
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
