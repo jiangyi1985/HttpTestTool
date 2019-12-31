@@ -67,6 +67,7 @@ namespace HttpTestTool
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    btnStart.IsEnabled = true;
                     txtOutput.AppendText("Set Min Threads Failed!\r\n");
                 });
                 return;
