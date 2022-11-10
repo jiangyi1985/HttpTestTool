@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.452
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpTestTool", "HttpTestTool\HttpTestTool.csproj", "{766E8A96-A74D-4BED-9508-81AC4B7E0ACD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{CB65DB9B-F256-40CA-B638-D0F03166828E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{766E8A96-A74D-4BED-9508-81AC4B7E0ACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{766E8A96-A74D-4BED-9508-81AC4B7E0ACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{766E8A96-A74D-4BED-9508-81AC4B7E0ACD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB65DB9B-F256-40CA-B638-D0F03166828E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB65DB9B-F256-40CA-B638-D0F03166828E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB65DB9B-F256-40CA-B638-D0F03166828E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB65DB9B-F256-40CA-B638-D0F03166828E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

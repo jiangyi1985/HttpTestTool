@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -28,12 +29,44 @@ namespace HttpTestTool
         //static readonly CancellationTokenSource Source = new CancellationTokenSource();
         //private CancellationToken _token = Source.Token;
 
+        ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
+        ConcurrentBag<DateTime> _dtStartList, _dtEndList;
+
         public MainWindow()
         {
             InitializeComponent();
 
+            var setMinThreads = ThreadPool.SetMinThreads(1000, 1000);
+
             //var tokenSource = new CancellationTokenSource();
             //token = tokenSource.Token;
+
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (_logQueue.Count > 0)
+                    {
+                        //Console.WriteLine($"outputing {_logQueue.Count} logs...");
+                        List<string> list = new List<string>();
+                        while (_logQueue.Count > 0)
+                        {
+                            _logQueue.TryDequeue(out string msg);
+                            list.Add(msg);
+                        }
+                        var text = list.Aggregate((a, b) => a + Environment.NewLine + b);
+                        Application.Current.Dispatcher.Invoke(() =>
+                                txtOutput.AppendText(text + Environment.NewLine));
+                    }
+                    else
+                    {
+                        //Console.WriteLine("no log to output. sleeping...");
+                        Thread.Sleep(500);
+                    }
+
+                    //Console.WriteLine(ThreadPool.GetAvailableThreads);
+                }
+            });
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
@@ -62,16 +95,19 @@ namespace HttpTestTool
             //Thread.Sleep(3000);
             //return;
 
-            var setMinThreads = ThreadPool.SetMinThreads(count, count);
-            if (!setMinThreads)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    btnStart.IsEnabled = true;
-                    txtOutput.AppendText("Set Min Threads Failed!\r\n");
-                });
-                return;
-            }
+            _dtStartList = new ConcurrentBag<DateTime>();
+            _dtEndList = new ConcurrentBag<DateTime>();
+
+            //var setMinThreads = ThreadPool.SetMinThreads(count+10, count + 10);
+            //if (!setMinThreads)
+            //{
+            //    Log("Set Min Threads Failed!");
+            //    Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        btnStart.IsEnabled = true;
+            //    });
+            //    return;
+            //}
 
             var r = new Random();
 
@@ -84,6 +120,12 @@ namespace HttpTestTool
                 tasks.Add(new Task<Result>(() =>
                 {
                     var threadId = Thread.CurrentThread.ManagedThreadId;
+
+                    _dtStartList.Add(DateTime.Now);
+                    if (showThreadLog)
+                    {
+                        Log("thread: " + threadId + " start...");
+                    }
 
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
@@ -122,17 +164,14 @@ namespace HttpTestTool
 
                     var elapsedTotalMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
 
+                    _dtEndList.Add(DateTime.Now);
                     if (showThreadLog)
                     {
                         if (response != null)
-                            Application.Current.Dispatcher.Invoke(() =>
-                                txtOutput.AppendText("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds +
-                                                     "ms " + statusCode + " " + length + "B " + (showResponse ? str : "") +
-                                                     "\r\n"));
+                            Log("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds + "ms "
+                                + statusCode + " " + length + "B " + (showResponse ? str : ""));
                         else
-                            Application.Current.Dispatcher.Invoke(() =>
-                                txtOutput.AppendText("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds +
-                                                     "ms " + str + "\r\n"));
+                            Log("thread: " + threadId + " " + "t: " + elapsedTotalMilliseconds + "ms " + str);
                     }
 
                     return new Result()
@@ -143,10 +182,7 @@ namespace HttpTestTool
                 }));
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                txtOutput.AppendText("Starting " + count + " client(s)...\r\n");
-            });
+            Log("Starting " + count + " client(s)...");
 
             switch (mode)
             {
@@ -156,13 +192,27 @@ namespace HttpTestTool
                 case "evenlyDistributed":
                     //var timeRange = Int32.Parse(txtTimeRange.Text);
                     var waitTimePerRequest = count == 1 ? 0 : (double)timeRange / (count - 1);
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
                     for (int i = 0; i < count; i++)
                     {
+                        //each (task start + thread sleep) operation takes about 10ms
+
                         tasks[i].Start();
 
                         if (i != count - 1)
-                            Thread.Sleep(TimeSpan.FromSeconds(waitTimePerRequest));
+                        {
+                            //Thread.Sleep(TimeSpan.FromSeconds(waitTimePerRequest));
+
+                            var elapsed = stopwatch.ElapsedMilliseconds;
+                            var expectedNext = (i+1) * waitTimePerRequest * 1000;
+                            var delay = expectedNext - elapsed;
+                            if (delay < 0) delay = 0;
+                            //Console.WriteLine($"elapsed {elapsed} expectedNext {expectedNext} delay {delay}");
+                            Thread.Sleep((int)delay);
+                        }
                     }
+                    stopwatch.Stop();
 
                     break;
                 default:
@@ -170,20 +220,23 @@ namespace HttpTestTool
             }
 
             Task.WaitAll(tasks.ToArray());
+            var min = tasks.Min(o => o.Result.ElapsedMilliseconds);
+            var max = tasks.Max(o => o.Result.ElapsedMilliseconds);
+            var avg = tasks.Average(o => o.Result.ElapsedMilliseconds);
+            var statusCodeSummary = tasks.GroupBy(o => o.Result.StatusCode).OrderBy(o => o.Key)
+                .Select(o => (o.Key == 0 ? "Ex" : o.Key.ToString()) + ":" + o.Count()).Aggregate((o, n) => o + " " + n);
+            var minStart = _dtStartList.Min(t => t);
+            var maxStart = _dtStartList.Max(t => t);
+            var minEnd = _dtEndList.Min(t => t);
+            var maxEnd = _dtEndList.Max(t => t);
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var min = tasks.Min(o => o.Result.ElapsedMilliseconds);
-                var max = tasks.Max(o => o.Result.ElapsedMilliseconds);
-                var avg = tasks.Average(o => o.Result.ElapsedMilliseconds);
-                var statusCodes = tasks.GroupBy(o => o.Result.StatusCode).OrderBy(o => o.Key)
-                    .Select(o => (o.Key == 0 ? "Ex" : o.Key.ToString()) + ":" + o.Count()).Aggregate((o, n) => o + " " + n);
-                txtOutput.AppendText("--------------------------------------------------------\r\n");
-                txtOutput.AppendText("avg: " + avg + "ms min: " + min + "ms max: " + max + "ms\r\n"
-                                     + statusCodes + "\r\n");
-                txtOutput.AppendText("--------------------------------------------------------\r\n");
-                txtOutput.AppendText("\r\n");
-            });
+            Log("--------------------------------------------------------");
+            Log("Avg: " + avg + "ms Min: " + min + "ms Max: " + max + "ms");
+            Log(statusCodeSummary);
+            Log($"thread start:{minStart.ToString("HH:mm:ss.fff")}~{maxStart.ToString("HH:mm:ss.fff")} diff:{(maxStart - minStart).TotalSeconds}s");
+            Log($"\tend:{minEnd.ToString("HH:mm:ss.fff")}~{maxEnd.ToString("HH:mm:ss.fff")} diff:{(maxEnd - minEnd).TotalSeconds}s");
+            Log("--------------------------------------------------------");
+            Log("");
 
             Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -200,6 +253,11 @@ namespace HttpTestTool
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             //Source.Cancel();
+        }
+
+        private void Log(string text)
+        {
+            _logQueue.Enqueue(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff") + " " + text);
         }
     }
 }
