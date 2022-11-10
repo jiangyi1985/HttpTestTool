@@ -196,8 +196,6 @@ namespace HttpTestTool
                     stopwatch.Start();
                     for (int i = 0; i < count; i++)
                     {
-                        //each (task start + thread sleep) operation takes about 10ms
-
                         tasks[i].Start();
 
                         if (i != count - 1)
