@@ -1,0 +1,15 @@
+﻿<Window x:Class="HttpTestTool.EditPostWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HttpTestTool"
+        mc:Ignorable="d"
+        Title="EditPostWindow" Height="464" Width="601">
+    <Grid>
+        <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="250,0,0,10" Width="45" VerticalAlignment="Bottom" Click="btnSave_Click"/>
+        <TextBox x:Name="txtPostData" Margin="10,10,10,51" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+        <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="300,0,0,10" Height="19" VerticalAlignment="Bottom" Click="btnCancel_Click"/>
+
+    </Grid>
+</Window>

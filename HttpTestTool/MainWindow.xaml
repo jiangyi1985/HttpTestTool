@@ -8,26 +8,32 @@
         Title="Http Request Sender" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="199*"/>
-            <ColumnDefinition Width="65*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="txtOutput" Margin="10,125,10,10" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="2" />
-        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Margin="476,45,0,0" VerticalAlignment="Top" Width="75" Click="BtnStart_Click"/>
-        <TextBox x:Name="txtCount" HorizontalAlignment="Left" Margin="93,46,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="46" TextAlignment="Center" Height="19"/>
-        <Label Content="Client Count:" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="556,45,0,0" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click" Grid.ColumnSpan="2"/>
-        <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="selectMode" HorizontalAlignment="Left" Margin="59,75,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
+        <TextBox x:Name="txtOutput" Margin="10,125,10,10" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" />
+        <Button x:Name="btnStart" Content="Start" Margin="294,97,0,0" VerticalAlignment="Top" Click="BtnStart_Click" HorizontalAlignment="Left" Width="76"/>
+        <TextBox x:Name="txtCount" HorizontalAlignment="Left" Margin="93,70,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="59" TextAlignment="Center" VerticalContentAlignment="Center"/>
+        <Label Content="Client Count:" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top" Width="83" Padding="0,5,5,5"/>
+        <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="375,97,0,0" VerticalAlignment="Top" Width="76" Click="BtnCancel_Click" IsEnabled="False"/>
+        <Label Content="Mode:" HorizontalAlignment="Left" Margin="167,66,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center"/>
+        <ComboBox x:Name="selectMode" HorizontalAlignment="Left" Margin="216,68,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0" SelectionChanged="selectMode_SelectionChanged" VerticalContentAlignment="Center">
             <ComboBoxItem Name="burst">Burst</ComboBoxItem>
             <ComboBoxItem Name="evenlyDistributed">Distributed (evenly)</ComboBoxItem>
             <ComboBoxItem Name="randomlyDistributed">Distributed (randomly)</ComboBoxItem>
         </ComboBox>
-        <TextBox x:Name="txtTimeRange" TextAlignment="Center" HorizontalAlignment="Left" Height="20" Margin="430,78,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="45"/>
-        <Label Content="Time Range (s) (in Distributed Mode):" HorizontalAlignment="Left" Margin="205,73,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txtUrl" HorizontalAlignment="Left" Height="23" Margin="49,14,0,0" TextWrapping="Wrap" Text="http://localhost:5004/api/misc/sleep" VerticalAlignment="Top" Width="485"/>
-        <Label Content="URL:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="cbShowThreadLog" Content="Show Thread Log" HorizontalAlignment="Left" Margin="182,48,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="cbShowResponse" Content="Show Response" HorizontalAlignment="Left" Margin="307,48,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtTimeRange" TextAlignment="Center" HorizontalAlignment="Left" Margin="562,70,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="45" IsEnabled="False" VerticalContentAlignment="Center"/>
+        <Label x:Name="lblTimeRange" Content="Time Range (s) (Distributed Mode):" HorizontalAlignment="Left" Margin="349,66,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+        <TextBox x:Name="txtUrl" HorizontalAlignment="Left" Margin="38,14,0,0" TextWrapping="Wrap" Text="http://localhost:5004/api/misc/sleep" VerticalAlignment="Top" Width="485" VerticalContentAlignment="Center"/>
+        <Label Content="UrL:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Padding="0,5,5,5"/>
+        <CheckBox x:Name="cbShowThreadLog" Content="Show Thread Log" HorizontalAlignment="Left" Margin="10,98,0,0" VerticalAlignment="Top" IsChecked="True" FlowDirection="LeftToRight" VerticalContentAlignment="Center"/>
+        <CheckBox x:Name="cbShowResponse" Content="Show Response" HorizontalAlignment="Left" Margin="154,99,0,0" VerticalAlignment="Top" FlowDirection="LeftToRight" VerticalContentAlignment="Center"/>
+        <ComboBox x:Name="selectMethod" HorizontalAlignment="Left" Margin="528,12,0,0" VerticalAlignment="Top" Width="68" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBoxItem Content="GET"/>
+            <ComboBoxItem Content="POST"/>
+        </ComboBox>
+        <Button x:Name="btnEditPost" Content="Edit Body" HorizontalAlignment="Left" Margin="601,13,0,0" VerticalAlignment="Top" Click="txtEditPost_Click" Width="62" IsEnabled="False"/>
+        <TextBox HorizontalAlignment="Left" Margin="97,43,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="426" VerticalContentAlignment="Center"/>
+        <Label Content="Authorization:" HorizontalAlignment="Left" Margin="11,39,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
 
     </Grid>
 </Window>
