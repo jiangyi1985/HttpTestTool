@@ -207,6 +207,7 @@ namespace HttpTestTool
             var request = WebRequest.CreateHttp(url);
             request.Timeout = 20000;//todo:set by UI
             request.Method = method;
+            request.AllowAutoRedirect = true;//todo:set by UI
 
             if(request.Method == "POST")
             {
