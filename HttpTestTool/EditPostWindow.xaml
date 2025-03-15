@@ -8,7 +8,7 @@
         Title="EditPostWindow" Height="464" Width="601">
     <Grid>
         <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="250,0,0,10" Width="45" VerticalAlignment="Bottom" Click="btnSave_Click"/>
-        <TextBox x:Name="txtPostData" Margin="10,10,10,51" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+        <TextBox x:Name="txtPostData" Margin="10,10,10,51" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" AcceptsReturn="True"/>
         <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="300,0,0,10" Height="19" VerticalAlignment="Bottom" Click="btnCancel_Click"/>
 
     </Grid>
