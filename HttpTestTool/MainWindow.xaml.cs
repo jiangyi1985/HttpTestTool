@@ -209,17 +209,6 @@ namespace HttpTestTool
             request.Method = method;
             request.AllowAutoRedirect = true;//todo:set by UI
 
-            if(request.Method == "POST")
-            {
-                request.ContentType = "application/json";
-                var reqStream = await request.GetRequestStreamAsync();
-                var sw = new StreamWriter(reqStream);
-                sw.Write(_postData);
-                sw.Close();
-                reqStream.Close();
-            }
-            //Thread.Sleep(r.Next(1000,2000));
-
             long length = 0;
             HttpStatusCode statusCode = (HttpStatusCode)0;
             string str = null;
@@ -227,6 +216,17 @@ namespace HttpTestTool
             HttpWebResponse response = null;
             try
             {
+                if (request.Method == "POST")
+                {
+                    request.ContentType = "application/json";
+                    var reqStream = await request.GetRequestStreamAsync();
+                    var sw = new StreamWriter(reqStream);
+                    sw.Write(_postData);
+                    sw.Close();
+                    reqStream.Close();
+                }
+                //Thread.Sleep(r.Next(1000,2000));
+
                 response = await request.GetResponseAsync() as HttpWebResponse;
             }
             catch (WebException ex)
