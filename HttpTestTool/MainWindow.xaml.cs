@@ -32,6 +32,7 @@ namespace HttpTestTool
         ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
         ConcurrentBag<DateTime> _dtStartList, _dtEndList;
         private string _postData;
+        private string _authorization;
 
         public MainWindow()
         {
@@ -79,6 +80,7 @@ namespace HttpTestTool
             var showResponse = cbShowResponse.IsChecked.Value;
             var timeRange = Int32.Parse(txtTimeRange.Text);
             var method = ((ComboBoxItem)selectMethod.SelectedItem).Content.ToString();
+            _authorization = txtAuthorization.Text.Trim();
 
             btnStart.IsEnabled = false;
 
@@ -219,6 +221,11 @@ namespace HttpTestTool
                 if (request.Method == "POST")
                 {
                     request.ContentType = "application/json";
+
+                    if (!string.IsNullOrEmpty(_authorization)) {
+                        request.Headers.Add("Authorization", $"{_authorization}");
+                    }
+
                     var reqStream = await request.GetRequestStreamAsync();
                     var sw = new StreamWriter(reqStream);
                     sw.Write(_postData);
