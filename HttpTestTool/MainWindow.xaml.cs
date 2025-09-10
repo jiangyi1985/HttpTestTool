@@ -313,10 +313,13 @@ namespace HttpTestTool
         private void txtEditPost_Click(object sender, RoutedEventArgs e)
         {
             var w = new EditPostWindow();
+
+            w.txtPostData.Text = _postData;
             w.OnSave += text =>
             {
                 _postData = text;
             };
+
             w.ShowDialog();
         }
 

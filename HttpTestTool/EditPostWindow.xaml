@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HttpTestTool"
         mc:Ignorable="d"
-        Title="EditPostWindow" Height="464" Width="601">
+        Title="Edit POST body" Height="464" Width="601">
     <Grid>
         <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="250,0,0,10" Width="45" VerticalAlignment="Bottom" Click="btnSave_Click"/>
         <TextBox x:Name="txtPostData" Margin="10,10,10,51" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" AcceptsReturn="True"/>
