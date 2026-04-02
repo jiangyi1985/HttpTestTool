@@ -216,15 +216,17 @@ namespace HttpTestTool
             string str = null;
 
             HttpWebResponse response = null;
+
+            if (!string.IsNullOrEmpty(_authorization))
+            {
+                request.Headers.Add("Authorization", $"{_authorization}");
+            }
+
             try
             {
                 if (request.Method == "POST")
                 {
                     request.ContentType = "application/json";
-
-                    if (!string.IsNullOrEmpty(_authorization)) {
-                        request.Headers.Add("Authorization", $"{_authorization}");
-                    }
 
                     var reqStream = await request.GetRequestStreamAsync();
                     var sw = new StreamWriter(reqStream);
